@@ -7,7 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.sql.Date;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "PATIENT")
@@ -18,7 +18,7 @@ public class Patient {
     private String surname;
     private String address;
     @CreationTimestamp
-    private Date entryDate;
+    private Timestamp entryDate;
 
     public int getDni() {
         return dni;
@@ -52,11 +52,11 @@ public class Patient {
         this.address = address;
     }
 
-    public Date getEntryDate() {
+    public Timestamp getEntryDate() {
         return entryDate;
     }
 
-    public void setEntryDate(Date entryDate) {
+    public void setEntryDate(Timestamp entryDate) {
         this.entryDate = entryDate;
     }
 

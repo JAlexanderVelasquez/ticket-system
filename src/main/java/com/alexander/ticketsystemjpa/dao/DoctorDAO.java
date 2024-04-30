@@ -1,6 +1,7 @@
 package com.alexander.ticketsystemjpa.dao;
 
 import com.alexander.ticketsystemjpa.entity.Doctor;
+import com.alexander.ticketsystemjpa.logger.SystemLogger;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -10,12 +11,13 @@ import java.util.List;
 
 @Transactional
 @Repository
-public class DoctorDAO implements IDoctorDAO {
+public class DoctorDAO implements IDoctorDAO, SystemLogger {
     @PersistenceContext
     private EntityManager entityManager;
 
     @Override
     public void addDoctor(Doctor doctor) {
+        logger.debug("addDoctor called with: {}",doctor);
         entityManager.persist(doctor);
     }
     @Override
@@ -36,7 +38,6 @@ public class DoctorDAO implements IDoctorDAO {
     @Override
     public void updateDoctor(Doctor doctor) {
         Doctor doctorFromDB = getDoctorById(doctor.getDni());
-
         if (doctorFromDB != null) {
             doctorFromDB.setName(doctor.getName());
             doctorFromDB.setSurname(doctor.getSurname());

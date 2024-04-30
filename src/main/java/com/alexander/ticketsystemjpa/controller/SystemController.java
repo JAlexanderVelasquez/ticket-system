@@ -1,7 +1,11 @@
 package com.alexander.ticketsystemjpa.controller;
 
+import com.alexander.ticketsystemjpa.dto.request.AppointmentRequestDTO;
+import com.alexander.ticketsystemjpa.entity.Appointment;
+import com.alexander.ticketsystemjpa.entity.AppointmentPK;
 import com.alexander.ticketsystemjpa.entity.Doctor;
 import com.alexander.ticketsystemjpa.entity.Patient;
+import com.alexander.ticketsystemjpa.service.IAppointmentService;
 import com.alexander.ticketsystemjpa.service.IDoctorService;
 import com.alexander.ticketsystemjpa.service.IPatientService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +24,8 @@ public class SystemController {
     private IDoctorService doctorService;
     @Autowired
     private IPatientService patientService;
+    @Autowired
+    private IAppointmentService appointmentService;
 
     //DOCTOR
     @GetMapping("/doctors")
@@ -82,5 +88,51 @@ public class SystemController {
     public ResponseEntity<Patient> updatePatient(@RequestBody Patient patient) {
         patientService.updatePatient(patient);
         return new ResponseEntity<Patient>(patient, HttpStatus.OK);
+    }
+    
+//APPOINTMENT
+    @GetMapping("/appointments")
+    public ResponseEntity<List<Appointment>> getAllAppointments() {
+        List<Appointment> list = appointmentService.getAllAppointments();
+        return new ResponseEntity<List<Appointment>>(list, HttpStatus.OK);
+    }
+    @GetMapping("/appointments/patient/{dni}")
+    public ResponseEntity<List<Appointment>> getAllAppointmentsByPatient(@PathVariable("dni") Integer dni) {
+        List<Appointment> list = appointmentService.getAllAppointmentsByPatient(dni);
+        return new ResponseEntity<List<Appointment>>(list, HttpStatus.OK);
+    }
+    @GetMapping("/appointments/doctor/{dni}")
+    public ResponseEntity<List<Appointment>> getAllAppointmentsByDoctor(@PathVariable("dni") Integer dni) {
+        List<Appointment> list = appointmentService.getAllAppointmentsByPatient(dni);
+        return new ResponseEntity<List<Appointment>>(list, HttpStatus.OK);
+    }
+    @GetMapping("/appointment/patient/{dni_patient}/doctor/{dni_doctor}")
+    public ResponseEntity<Appointment> getAppointmentById(@PathVariable("dni_patient") Integer dni_patient,@PathVariable("dni_doctor") Integer dni_doctor) {
+        Appointment rs = appointmentService.getAppointmentById(dni_patient,dni_doctor);
+        return rs == null ? new ResponseEntity<Appointment>(rs, HttpStatus.NOT_FOUND) : new ResponseEntity<Appointment>(rs, HttpStatus.OK);
+    }
+    @PostMapping("/appointment")
+    public ResponseEntity<Void> addAppointment(@RequestBody AppointmentRequestDTO requestDTO, UriComponentsBuilder builder) {
+        System.out.println("\n\ncall controller with "+ requestDTO + "\n\n");
+        AppointmentPK appointmentPK = new AppointmentPK(requestDTO.getPatientDni(),requestDTO.getDoctorDni());
+        Appointment appointment = new Appointment(appointmentPK, requestDTO.getDate());
+        appointmentService.addAppointment(appointment);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(builder.path("/appointment/{id}").buildAndExpand(appointmentPK).toUri());
+        return new ResponseEntity<Void>(headers, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/appointment/patient/{dni_patient}/doctor/{dni_doctor}")
+    public ResponseEntity<Void> deleteAppointment(@PathVariable("dni_patient") Integer dni_patient,@PathVariable("dni_doctor") Integer dni_doctor) {
+        appointmentService.deleteAppointment(dni_patient,dni_doctor);
+        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+    }
+
+    @PutMapping("/appointment")
+    public ResponseEntity<Appointment> updateAppointment(@RequestBody AppointmentRequestDTO requestDTO) {
+        AppointmentPK appointmentPK = new AppointmentPK(requestDTO.getPatientDni(),requestDTO.getDoctorDni());
+        Appointment appointment = new Appointment(appointmentPK, requestDTO.getDate());
+        appointmentService.updateAppointment(appointment);
+        return new ResponseEntity<Appointment>(appointment, HttpStatus.OK);
     }
 }
